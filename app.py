@@ -30,22 +30,22 @@ AZURE_SEARCH_URL_COLUMN = os.environ.get("AZURE_SEARCH_URL_COLUMN")
 
 # AOAI Integration Settings
 AZURE_OPENAI_RESOURCE = os.environ.get("AZURE_OPENAI_RESOURCE", "az-openai-east")
-AZURE_OPENAI_MODEL = os.environ.get("AZURE_OPENAI_MODEL", "gpt-4-32k")
+AZURE_OPENAI_MODEL = "gpt-35-turbo"
 AZURE_OPENAI_KEY = os.environ.get("AZURE_OPENAI_KEY")
 AZURE_OPENAI_TEMPERATURE = os.environ.get("AZURE_OPENAI_TEMPERATURE", 0)
 AZURE_OPENAI_TOP_P = os.environ.get("AZURE_OPENAI_TOP_P", 1.0)
 AZURE_OPENAI_MAX_TOKENS = os.environ.get("AZURE_OPENAI_MAX_TOKENS", 1000)
 AZURE_OPENAI_STOP_SEQUENCE = os.environ.get("AZURE_OPENAI_STOP_SEQUENCE")
 AZURE_OPENAI_SYSTEM_MESSAGE = os.environ.get("AZURE_OPENAI_SYSTEM_MESSAGE", "You are a master sales manager that specializing in advising inexperienced sellers.  Please use all your expertise to approach this task.  Output your content in markdown format and include titles and subtitles where relevant.")
-AZURE_OPENAI_PREVIEW_API_VERSION = os.environ.get("AZURE_OPENAI_PREVIEW_API_VERSION", "2023-03-15-preview")
+AZURE_OPENAI_PREVIEW_API_VERSION = os.environ.get("AZURE_OPENAI_PREVIEW_API_VERSION", "2023-06-01-preview")
 AZURE_OPENAI_STREAM = os.environ.get("AZURE_OPENAI_STREAM", "true")
-AZURE_OPENAI_MODEL_NAME = os.environ.get("AZURE_OPENAI_MODEL_NAME", "gpt-4-32k") # Name of the model, e.g. 'gpt-35-turbo' or 'gpt-4'
+AZURE_OPENAI_MODEL_NAME = "gpt-35-turbo"  # Name of the model, e.g. 'gpt-35-turbo' or 'gpt-4'
 
 SHOULD_STREAM = True if AZURE_OPENAI_STREAM.lower() == "true" else False
 
 def is_chat_model():
     if 'gpt-4' in AZURE_OPENAI_MODEL_NAME.lower():
-        #print("GPT4")
+        print("************************** MODEL IS GPT4")
         return True
     return False
 
@@ -55,7 +55,10 @@ def should_use_data():
     return False
 
 def prepare_body_headers_with_data(request):
+    print("############## IN PREPARE BODY HEADERS #########")
     request_messages = request.json["messages"]
+    print(request_messages)
+    print(AZURE_OPENAI_SYSTEM_MESSAGE)
 
     body = {
         "messages": request_messages,
@@ -90,7 +93,7 @@ def prepare_body_headers_with_data(request):
     chatgpt_url = f"https://{AZURE_OPENAI_RESOURCE}.openai.azure.com/openai/deployments/{AZURE_OPENAI_MODEL}"
     if is_chat_model():
         chatgpt_url += "/chat/completions?api-version=2023-03-15-preview"
-        #print(chatgpt_url)
+        print("*********************", chatgpt_url)
     else:
         chatgpt_url += "/completions?api-version=2023-03-15-preview"
 
@@ -106,7 +109,7 @@ def prepare_body_headers_with_data(request):
 
 
 def stream_with_data(body, headers, endpoint):
-    #print("looks like im in Stream with data")
+    print("###########   IN STREAM WITH DATA  ######################")
     s = requests.Session()
     response = {
         "id": "",
@@ -141,15 +144,16 @@ def stream_with_data(body, headers, endpoint):
                         deltaText = lineJson["choices"][0]["messages"][0]["delta"]["content"]
                         if deltaText != "[DONE]":
                             response["choices"][0]["messages"][1]["content"] += deltaText
-                    #print(response["model"])
+                    print(response["model"])
                     yield json.dumps(response).replace("\n", "\\n") + "\n"
     except Exception as e:
+        print("EXCEPTION IN STREAM WITH DATA", e)
         yield json.dumps({"error": str(e)}).replace("\n", "\\n") + "\n"
 
 
 def conversation_with_data(request):
     body, headers = prepare_body_headers_with_data(request)
-    #print(headers)
+    print("############## IN CONVERSATION WITH DATA #########", body)
     endpoint = f"https://{AZURE_OPENAI_RESOURCE}.openai.azure.com/openai/deployments/{AZURE_OPENAI_MODEL}/extensions/chat/completions?api-version={AZURE_OPENAI_PREVIEW_API_VERSION}"
     
     if not SHOULD_STREAM:
@@ -160,6 +164,8 @@ def conversation_with_data(request):
         return Response(json.dumps(r).replace("\n", "\\n"), status=status_code)
     else:
         if request.method == "POST":
+            print("############## CALLING STREAM WITH DATA #########", headers)
+            print("############## CALLING STREAM WITH DATA #########", endpoint)
             return Response(stream_with_data(body, headers, endpoint), mimetype='text/event-stream')
         else:
             return Response(None, mimetype='text/event-stream')
@@ -243,6 +249,7 @@ def conversation():
     try:
         use_data = should_use_data()
         if use_data:
+            print("###############  calling use_data  ###################")
             return conversation_with_data(request)
         else:
             return conversation_without_data(request)
