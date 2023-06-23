@@ -54,10 +54,7 @@ def should_use_data():
     return False
 
 def prepare_body_headers_with_data(request):
-    print("############## IN PREPARE BODY HEADERS #########")
     request_messages = request.json["messages"]
-    print(request_messages)
-    print(AZURE_OPENAI_SYSTEM_MESSAGE)
 
     body = {
         "messages": request_messages,
@@ -110,19 +107,15 @@ def stream_with_data(body, headers, endpoint):
     s = requests.Session()
     response = {
         "id": "",
-        "model": "gpt-4-32k",
+        "model": "",
         "created": 0,
         "object": "",
         "choices": [{
             "messages": []
         }]
     }
-    print(body)
-    print(headers)
-    print(endpoint)
     try:
         with s.post(endpoint, json=body, headers=headers, stream=True) as r:
-            print(r)
             for line in r.iter_lines(chunk_size=10):
                 if line:
                     lineJson = json.loads(line.lstrip(b"data:").decode("utf-8"))
@@ -145,10 +138,8 @@ def stream_with_data(body, headers, endpoint):
                         deltaText = lineJson["choices"][0]["messages"][0]["delta"]["content"]
                         if deltaText != "[DONE]":
                             response["choices"][0]["messages"][1]["content"] += deltaText
-                    print(response["model"])
                     yield json.dumps(response).replace("\n", "\\n") + "\n"
     except Exception as e:
-        print("EXCEPTION IN STREAM WITH DATA", json.dumps({"error": str(e)}).replace("\n", "\\n") + "\n")
         yield json.dumps({"error": str(e)}).replace("\n", "\\n") + "\n"
 
 
@@ -191,7 +182,6 @@ def stream_without_data(response):
 
 
 def conversation_without_data(request):
-    #print("looks like im in wothout data")
     openai.api_type = "azure"
     openai.api_base = f"https://{AZURE_OPENAI_RESOURCE}.openai.azure.com/"
     openai.api_version = "2023-03-15-preview"
