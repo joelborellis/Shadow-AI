@@ -26,7 +26,7 @@ jobs:
     - name: Build the Docker image
       run:         
         docker build . --file WebApp.Dockerfile --tag shadowai.azurecr.io/shadow-ai-app:$(date +'%Y-%m-%d')_$GITHUB_RUN_NUMBER;
-        docker tag fruoccopublic.azurecr.io/sample-app-aoai-chatgpt:$(date +'%Y-%m-%d')_$GITHUB_RUN_NUMBER shadoeai.azurecr.io/shadow-ai-app:latest;
-        docker push fruoccopublic.azurecr.io/sample-app-aoai-chatgpt:$(date +'%Y-%m-%d')_$GITHUB_RUN_NUMBER;
-        docker push fruoccopublic.azurecr.io/sample-app-aoai-chatgpt:latest;
+        docker tag shadowai.azurecr.io/shadow-ai-app:$(date +'%Y-%m-%d')_$GITHUB_RUN_NUMBER shadoeai.azurecr.io/shadow-ai-app:latest;
+        docker push shadowau.azurecr.io/shadow-ai-app:$(date +'%Y-%m-%d')_$GITHUB_RUN_NUMBER;
+        docker push shadowai.azurecr.io/shadow-ai-app:latest;
       
