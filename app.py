@@ -112,7 +112,8 @@ def stream_with_data(body, headers, endpoint):
         }]
     }
     try:
-        print(body)
+        print(endpoint)
+        print(headers)
         with s.post(endpoint, json=body, headers=headers, stream=True) as r:
             for line in r.iter_lines(chunk_size=10):
                 if line:
@@ -138,6 +139,7 @@ def stream_with_data(body, headers, endpoint):
                             response["choices"][0]["messages"][1]["content"] += deltaText
                     yield json.dumps(response).replace("\n", "\\n") + "\n"
     except Exception as e:
+        print(str(e))
         yield json.dumps({"error": str(e)}).replace("\n", "\\n") + "\n"
 
 
