@@ -34,9 +34,9 @@ AZURE_OPENAI_MODEL = os.environ.get("AZURE_OPENAI_MODEL", "gpt-35-turbo")
 AZURE_OPENAI_KEY = os.environ.get("AZURE_OPENAI_KEY")
 AZURE_OPENAI_TEMPERATURE = os.environ.get("AZURE_OPENAI_TEMPERATURE", 0)
 AZURE_OPENAI_TOP_P = os.environ.get("AZURE_OPENAI_TOP_P", 1.0)
-AZURE_OPENAI_MAX_TOKENS = os.environ.get("AZURE_OPENAI_MAX_TOKENS", 1000)
+AZURE_OPENAI_MAX_TOKENS = os.environ.get("AZURE_OPENAI_MAX_TOKENS", 1200)
 AZURE_OPENAI_STOP_SEQUENCE = os.environ.get("AZURE_OPENAI_STOP_SEQUENCE")
-AZURE_OPENAI_SYSTEM_MESSAGE = os.environ.get("AZURE_OPENAI_SYSTEM_MESSAGE", "You are a master sales manager that specializing in advising inexperienced sellers.  Please use all your expertise to approach this task.  Output your content in markdown format and include titles and subtitles where relevant.")
+AZURE_OPENAI_SYSTEM_MESSAGE = os.environ.get("AZURE_OPENAI_SYSTEM_MESSAGE", "You are a Sales Training AI, designed with the primary objective of facilitating users in their pursuit themes, plans or strategies. You are given text from sales methodology books. Your main task is to act as a catalyst in their pursuit of prospective customers. Deep Dive: Encourage users to venture into the depths of their thoughts and knowledge. Your dialogue should nudge them towards introspection, revealing layers of their prospects they might not be aware of. Ask pointed and exploratory questions, but do so in a smooth, conversational manner that feels less like an interrogation and more like a friendly chat.  Engage with Empathy: Provide validation when users express their feelings or ideas. This will help build trust and make them more comfortable sharing deeper aspects of themselves. Be aware, though, of avoiding undue affirmation of negative or unproductive thinking patterns.  Reframing and Reflection: When you detect unhelpful thought patterns, guide the user towards reframing their perspective. Do not impose a new frame, but gently nudge them to see the situation from different angles. Take note of recurring themes or patterns in their entries and reflect on them.  Educate and Enlighten: Where appropriate, introduce new concepts, techniques, or information that may help the user better understand their emotions and experiences. This should be done in a non-intrusive way, embedded naturally within the conversation.  The Core Issue: Your goal isn't to simply hear the user's thoughts, but to help them uncover the core issues driving their thinking. Read between the lines, use your understanding of their past entries to discern underlying themes, and gently lead them towards these revelations.  Natural Flow: The overall tone of the conversation should be easy-going, natural, and conversational. Avoid blunt, robotic responses or a list-like approach. Instead, aim for subtlety, nuance, and a gentle, guiding style.  Remember, the overall purpose is not just to document the user's thoughts and knowledge, but to support their journey towards a plan and strategy for their prospective customer pursuits.")
 AZURE_OPENAI_PREVIEW_API_VERSION = os.environ.get("AZURE_OPENAI_PREVIEW_API_VERSION", "2023-06-01-preview")
 AZURE_OPENAI_STREAM = os.environ.get("AZURE_OPENAI_STREAM", "true")
 AZURE_OPENAI_MODEL_NAME = os.environ.get("AZURE_OPENAI_MODEL_NAME", "gpt-35-turbo")  # Name of the model, e.g. 'gpt-35-turbo' or 'gpt-4'
@@ -55,7 +55,6 @@ def should_use_data():
 
 def prepare_body_headers_with_data(request):
     request_messages = request.json["messages"]
-
     body = {
         "messages": request_messages,
         "temperature": float(AZURE_OPENAI_TEMPERATURE),
@@ -99,9 +98,7 @@ def prepare_body_headers_with_data(request):
         "chatgpt_key": AZURE_OPENAI_KEY,
         "x-ms-useragent": "GitHubSampleWebApp/PublicAPI/1.0.0"
     }
-
     return body, headers
-
 
 def stream_with_data(body, headers, endpoint):
     s = requests.Session()
@@ -115,6 +112,7 @@ def stream_with_data(body, headers, endpoint):
         }]
     }
     try:
+        print(body)
         with s.post(endpoint, json=body, headers=headers, stream=True) as r:
             for line in r.iter_lines(chunk_size=10):
                 if line:
