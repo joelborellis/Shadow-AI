@@ -29,4 +29,3 @@ jobs:
         docker tag shadowai.azurecr.io/shadow-ai-app:$(date +'%Y-%m-%d')_$GITHUB_RUN_NUMBER shadowai.azurecr.io/shadow-ai-app:latest;
         docker push shadowai.azurecr.io/shadow-ai-app:$(date +'%Y-%m-%d')_$GITHUB_RUN_NUMBER;
         docker push shadowai.azurecr.io/shadow-ai-app:latest;
-      
