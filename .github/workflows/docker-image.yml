@@ -27,6 +27,6 @@ jobs:
       run:         
         docker build . --file WebApp.Dockerfile --tag shadowai.azurecr.io/shadow-ai-app:$(date +'%Y-%m-%d')_$GITHUB_RUN_NUMBER;
         docker tag shadowai.azurecr.io/shadow-ai-app:$(date +'%Y-%m-%d')_$GITHUB_RUN_NUMBER shadoeai.azurecr.io/shadow-ai-app:latest;
-        docker push shadowau.azurecr.io/shadow-ai-app:$(date +'%Y-%m-%d')_$GITHUB_RUN_NUMBER;
+        docker push shadowai.azurecr.io/shadow-ai-app:$(date +'%Y-%m-%d')_$GITHUB_RUN_NUMBER;
         docker push shadowai.azurecr.io/shadow-ai-app:latest;
       
