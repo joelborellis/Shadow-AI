@@ -234,7 +234,7 @@ const Chat = () => {
                             />
                             <QuestionInput
                                 clearOnSend
-                                placeholder="Type your sales question..."
+                                placeholder="Talk to me about your sales pursuits..."
                                 disabled={isLoading}
                                 onSend={question => makeApiRequest(question)}
                             />
