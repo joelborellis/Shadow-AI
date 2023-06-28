@@ -90,7 +90,7 @@ const Chat = () => {
             if (!abortController.signal.aborted) {
                 console.error(e);
                 console.error(result);
-                alert("An error occurred. Please try again. If the problem persists, please contact the site administrator.")
+                alert("An error occurred. Please try again. If the problem persists, please contact your site administrator.")
             }
             setAnswers([...answers, userMessage]);
         } finally {
