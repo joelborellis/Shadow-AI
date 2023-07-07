@@ -142,7 +142,6 @@ def stream_with_data(body, headers, endpoint):
         print(str(e))
         yield json.dumps({"error": str(e)}).replace("\n", "\\n") + "\n"
 
-
 def conversation_with_data(request):
     body, headers = prepare_body_headers_with_data(request)
     endpoint = f"https://{AZURE_OPENAI_RESOURCE}.openai.azure.com/openai/deployments/{AZURE_OPENAI_MODEL}/extensions/chat/completions?api-version={AZURE_OPENAI_PREVIEW_API_VERSION}"
