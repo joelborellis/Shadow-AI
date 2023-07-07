@@ -60,4 +60,4 @@ jobs:
         with:
           app-name: 'shadow-ai-app'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_3CCB0D54BE9940B5BA2C3662EF405BA3 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_09766F767F684DFC9E6E28693E1D4431 }}
