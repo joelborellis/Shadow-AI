@@ -44,7 +44,7 @@ AZURE_OPENAI_MODEL_NAME = os.environ.get("AZURE_OPENAI_MODEL_NAME") # Name of th
 SHOULD_STREAM = True if AZURE_OPENAI_STREAM.lower() == "true" else False
 
 def is_chat_model():
-    if 'gpt-4' in AZURE_OPENAI_MODEL_NAME.lower():
+    if 'gpt-35' in AZURE_OPENAI_MODEL_NAME.lower():
         return True
     return False
 
@@ -87,9 +87,9 @@ def prepare_body_headers_with_data(request):
 
     chatgpt_url = f'https://{AZURE_OPENAI_RESOURCE}.openai.azure.com/openai/deployments/{AZURE_OPENAI_MODEL}'
     if is_chat_model():
-        chatgpt_url += "/chat/completions?api-version=2023-03-15-preview"
+        chatgpt_url += f'/chat/completions?api-version={AZURE_OPENAI_PREVIEW_API_VERSION}'
     else:
-        chatgpt_url += "/completions?api-version=2023-03-15-preview"
+        chatgpt_url += f'/completions?api-version={AZURE_OPENAI_PREVIEW_API_VERSION}'
 
     headers = {
         "Content-Type": "application/json",
@@ -184,7 +184,7 @@ def stream_without_data(response):
 def conversation_without_data(request):
     openai.api_type = "azure"
     openai.api_base = f"https://{AZURE_OPENAI_RESOURCE}.openai.azure.com/"
-    openai.api_version = "2023-03-15-preview"
+    openai.api_version = AZURE_OPENAI_PREVIEW_API_VERSION
     openai.api_key = AZURE_OPENAI_KEY
 
     request_messages = request.json["messages"]
