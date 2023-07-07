@@ -180,7 +180,6 @@ def stream_without_data(response):
         }
         yield json.dumps(response_obj).replace("\n", "\\n") + "\n"
 
-
 def conversation_without_data(request):
     openai.api_type = "azure"
     openai.api_base = f"https://{AZURE_OPENAI_RESOURCE}.openai.azure.com/"
