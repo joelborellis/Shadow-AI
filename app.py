@@ -87,9 +87,9 @@ def prepare_body_headers_with_data(request):
 
     chatgpt_url = f'https://{AZURE_OPENAI_RESOURCE}.openai.azure.com/openai/deployments/{AZURE_OPENAI_MODEL}'
     if is_chat_model():
-        chatgpt_url += f'/chat/completions?api-version={AZURE_OPENAI_PREVIEW_API_VERSION}'
+        chatgpt_url += f'/chat/completions?api-version=2023-03-15-preview'
     else:
-        chatgpt_url += f'/completions?api-version={AZURE_OPENAI_PREVIEW_API_VERSION}'
+        chatgpt_url += f'/completions?api-version=2023-03-15-preview'
 
     headers = {
         "Content-Type": "application/json",
