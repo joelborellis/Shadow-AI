@@ -96,7 +96,7 @@ def prepare_body_headers_with_data(request):
         "api-key": AZURE_OPENAI_KEY,
         "chatgpt_url": chatgpt_url,
         "chatgpt_key": AZURE_OPENAI_KEY,
-        "x-ms-useragent": "GitHubSampleWebApp/PublicAPI/1.0.0"
+        "x-ms-useragent": "ShadowSeller/1.0.0"
     }
     return body, headers
 

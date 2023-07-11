@@ -36,13 +36,15 @@ const Layout = () => {
             <header className={styles.header} role={"banner"}>
                 <div className={styles.headerContainer}>
                     <Stack horizontal verticalAlign="center">
+                        {/*
                         <img
                             src={Azure}
                             className={styles.headerIcon}
                             aria-hidden="true"
-                        />
+                        />  
+                        */}                
                         <Link to="/" className={styles.headerTitleContainer}>
-                            <h3 className={styles.headerTitle}>Shadow.ai</h3>
+                            <h3 className={styles.headerTitle}>Shadow Seller</h3>
                         </Link>
                         <div className={styles.shareButtonContainer} role="button" tabIndex={0} aria-label="Share" onClick={handleShareClick} onKeyDown={e => e.key === "Enter" || e.key === " " ? handleShareClick() : null}>
                             <ShareRegular className={styles.shareButton} />
