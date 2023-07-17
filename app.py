@@ -55,6 +55,10 @@ def should_use_data():
 
 def prepare_body_headers_with_data(request):
     request_messages = request.json["messages"]
+
+    #with open('promp.json', 'w') as fp:
+                #fp.write(json.dumps(request_messages))
+                
     body = {
         "messages": request_messages,
         "temperature": float(AZURE_OPENAI_TEMPERATURE),
@@ -101,6 +105,30 @@ def prepare_body_headers_with_data(request):
     return body, headers
 
 def stream_with_data(body, headers, endpoint):
+    
+    #conversation = {
+        #"id": "",
+        #"choices": [{
+            #"messages": []
+        #}]
+    #}
+    
+    #for message in body["messages"]:
+        #print(message["role"])
+        #if message["role"] == "user":
+            #conversation["choices"][0]["messages"].append({
+                #"role": message["role"] ,
+                #"content": message["content"]
+            #})
+        #elif message["role"] == "assistant": 
+            #conversation["choices"][0]["messages"].append({
+                #"role": message["role"] ,
+                #"content": message["content"]
+            #})
+    
+    #with open('conversation.json', 'w') as fp:
+                #fp.write(json.dumps(conversation))
+    
     s = requests.Session()
     response = {
         "id": "",
@@ -112,20 +140,25 @@ def stream_with_data(body, headers, endpoint):
         }]
     }
     try:
-        print(endpoint)
-        print(headers)
+        #print(endpoint)
+        #print(headers)
         with s.post(endpoint, json=body, headers=headers, stream=True) as r:
+            collected_messages = []
             for line in r.iter_lines(chunk_size=10):
                 if line:
                     lineJson = json.loads(line.lstrip(b"data:").decode("utf-8"))
+                    
+                    chunk_message = lineJson["choices"][0]["messages"][0]["delta"]# extract the message
+                    collected_messages.append(chunk_message)  # save the message
+                    
                     if "error" in lineJson:
                         yield json.dumps(lineJson).replace("\n", "\\n") + "\n"
                     response["id"] = lineJson["id"]
                     response["model"] = lineJson["model"]
                     response["created"] = lineJson["created"]
                     response["object"] = lineJson["object"]
-
-                    role = lineJson["choices"][0]["messages"][0]["delta"].get("role")
+                    
+                    role = lineJson["choices"][0]["messages"][0]["delta"].get("role")    
                     if role == "tool":
                         response["choices"][0]["messages"].append(lineJson["choices"][0]["messages"][0]["delta"])
                     elif role == "assistant": 
@@ -136,8 +169,14 @@ def stream_with_data(body, headers, endpoint):
                     else:
                         deltaText = lineJson["choices"][0]["messages"][0]["delta"]["content"]
                         if deltaText != "[DONE]":
-                            response["choices"][0]["messages"][1]["content"] += deltaText
+                            response["choices"][0]["messages"][1]["content"] += deltaText              
                     yield json.dumps(response).replace("\n", "\\n") + "\n"
+            #full_reply_content = ''.join([m.get('content', '') for m in collected_messages])
+            #with open('dump.json', 'w') as fp:
+                #fp.write(json.dumps(full_reply_content))
+            #print(f"Full conversation received: {full_reply_content}")
+                                    
+                            
     except Exception as e:
         print(str(e))
         yield json.dumps({"error": str(e)}).replace("\n", "\\n") + "\n"
@@ -145,7 +184,7 @@ def stream_with_data(body, headers, endpoint):
 def conversation_with_data(request):
     body, headers = prepare_body_headers_with_data(request)
     endpoint = f"https://{AZURE_OPENAI_RESOURCE}.openai.azure.com/openai/deployments/{AZURE_OPENAI_MODEL}/extensions/chat/completions?api-version={AZURE_OPENAI_PREVIEW_API_VERSION}"
-    
+
     if not SHOULD_STREAM:
         r = requests.post(endpoint, headers=headers, json=body)
         status_code = r.status_code
