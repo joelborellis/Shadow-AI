@@ -104,31 +104,7 @@ def prepare_body_headers_with_data(request):
     }
     return body, headers
 
-def stream_with_data(body, headers, endpoint):
-    
-    #conversation = {
-        #"id": "",
-        #"choices": [{
-            #"messages": []
-        #}]
-    #}
-    
-    #for message in body["messages"]:
-        #print(message["role"])
-        #if message["role"] == "user":
-            #conversation["choices"][0]["messages"].append({
-                #"role": message["role"] ,
-                #"content": message["content"]
-            #})
-        #elif message["role"] == "assistant": 
-            #conversation["choices"][0]["messages"].append({
-                #"role": message["role"] ,
-                #"content": message["content"]
-            #})
-    
-    #with open('conversation.json', 'w') as fp:
-                #fp.write(json.dumps(conversation))
-    
+def stream_with_data(body, headers, endpoint):    
     s = requests.Session()
     response = {
         "id": "",
@@ -140,17 +116,13 @@ def stream_with_data(body, headers, endpoint):
         }]
     }
     try:
-        #print(endpoint)
-        #print(headers)
+        print(endpoint)
+        print(headers)
         with s.post(endpoint, json=body, headers=headers, stream=True) as r:
             collected_messages = []
             for line in r.iter_lines(chunk_size=10):
                 if line:
-                    lineJson = json.loads(line.lstrip(b"data:").decode("utf-8"))
-                    
-                    chunk_message = lineJson["choices"][0]["messages"][0]["delta"]# extract the message
-                    collected_messages.append(chunk_message)  # save the message
-                    
+                    lineJson = json.loads(line.lstrip(b"data:").decode("utf-8"))                    
                     if "error" in lineJson:
                         yield json.dumps(lineJson).replace("\n", "\\n") + "\n"
                     response["id"] = lineJson["id"]
@@ -171,14 +143,10 @@ def stream_with_data(body, headers, endpoint):
                         if deltaText != "[DONE]":
                             response["choices"][0]["messages"][1]["content"] += deltaText              
                     yield json.dumps(response).replace("\n", "\\n") + "\n"
-            #full_reply_content = ''.join([m.get('content', '') for m in collected_messages])
-            #with open('dump.json', 'w') as fp:
-                #fp.write(json.dumps(full_reply_content))
-            #print(f"Full conversation received: {full_reply_content}")
                                     
                             
     except Exception as e:
-        print(str(e))
+        print(json.dumps(str(e)))
         yield json.dumps({"error": str(e)}).replace("\n", "\\n") + "\n"
 
 def conversation_with_data(request):
