@@ -4,11 +4,17 @@ import Azure from "../../assets/Shadow Seller 180 X 180.png";
 import { CopyRegular, ShareRegular } from "@fluentui/react-icons";
 import { Dialog, Stack, TextField } from "@fluentui/react";
 import { useEffect, useState } from "react";
+import { useIsAuthenticated } from "@azure/msal-react";
+import { SignInButton } from "../../components/Signin/SignInButton";
+import { SignOutButton } from "../../components/Signin/SignOutButton";
+import Navbar from "react-bootstrap/Navbar";
 
-const Layout = () => {
+const Layout = (props: any) => {
     const [isSharePanelOpen, setIsSharePanelOpen] = useState<boolean>(false);
     const [copyClicked, setCopyClicked] = useState<boolean>(false);
     const [copyText, setCopyText] = useState<string>("Copy URL");
+    const isAuthenticated = useIsAuthenticated();
+    
 
     const handleShareClick = () => {
         setIsSharePanelOpen(true);
@@ -44,54 +50,16 @@ const Layout = () => {
                         />  
                         */}                
                         <Link to="/" className={styles.headerTitleContainer}>
-                            <h3 className={styles.headerTitle}>Shadow Seller</h3>
+                            <h3 className={styles.headerTitle}>Shadow Seller - </h3>{props.children}
                         </Link>
-                        <div className={styles.shareButtonContainer} role="button" tabIndex={0} aria-label="Share" onClick={handleShareClick} onKeyDown={e => e.key === "Enter" || e.key === " " ? handleShareClick() : null}>
-                            <ShareRegular className={styles.shareButton} />
-                            <span className={styles.shareButtonText}>Share</span>
+                        <div className={styles.shareButtonContainer}>
+                            {isAuthenticated ? <SignOutButton /> : <SignInButton />}
                         </div>
                     </Stack>
                 </div>
             </header>
             <Outlet />
-            <Dialog 
-                onDismiss={handleSharePanelDismiss}
-                hidden={!isSharePanelOpen}
-                styles={{
-                    
-                    main: [{
-                        selectors: {
-                          ['@media (min-width: 480px)']: {
-                            maxWidth: '600px',
-                            background: "#FFFFFF",
-                            boxShadow: "0px 14px 28.8px rgba(0, 0, 0, 0.24), 0px 0px 8px rgba(0, 0, 0, 0.2)",
-                            borderRadius: "8px",
-                            maxHeight: '200px',
-                            minHeight: '100px',
-                          }
-                        }
-                      }]
-                }}
-                dialogContentProps={{
-                    title: "Share the web app",
-                    showCloseButton: true
-                }}
-            >
-                <Stack horizontal verticalAlign="center" style={{gap: "8px"}}>
-                    <TextField className={styles.urlTextBox} defaultValue={window.location.href} readOnly/>
-                    <div 
-                        className={styles.copyButtonContainer} 
-                        role="button" 
-                        tabIndex={0} 
-                        aria-label="Copy" 
-                        onClick={handleCopyClick}
-                        onKeyDown={e => e.key === "Enter" || e.key === " " ? handleCopyClick() : null}
-                    >
-                        <CopyRegular className={styles.copyButton} />
-                        <span className={styles.copyButtonText}>{copyText}</span>
-                    </div>
-                </Stack>
-            </Dialog>
+
         </div>
     );
 };
