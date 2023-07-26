@@ -47,7 +47,7 @@
     gap: 4px;
     width: 86px;
     height: 32px;
-    background: radial-gradient(109.81% 107.82% at 100.1% 90.19%, #ffffff 33.63%, #ede9e9 70.31%, #eee0db 100%) /* warning: gradient uses a rotation that is not supported by CSS and may not behave as expected */;
+    background: radial-gradient(109.81% 107.82% at 100.1% 90.19%, #000000 33.63%, #000000 70.31%, #000000 100%) /* warning: gradient uses a rotation that is not supported by CSS and may not behave as expected */;
     border-radius: 4px;
     flex: none;
     order: 1;

@@ -8,6 +8,10 @@ import { useIsAuthenticated } from "@azure/msal-react";
 import { SignInButton } from "../../components/Signin/SignInButton";
 import { SignOutButton } from "../../components/Signin/SignOutButton";
 
+import { loginRequest } from '../../authConfig';
+import { callMsGraph } from '../../graph';
+import { useMsal } from '@azure/msal-react';
+
 const Layout = (props: any) => {
     const [isSharePanelOpen, setIsSharePanelOpen] = useState<boolean>(false);
     const [copyClicked, setCopyClicked] = useState<boolean>(false);
@@ -36,6 +40,32 @@ const Layout = (props: any) => {
         }
     }, [copyClicked]);
 
+    /**
+* Renders information about the signed-in user or a button to retrieve data about the user
+*/
+    const ProfileContent = () => {
+        const { instance, accounts } = useMsal();
+        const [graphData, setGraphData] = useState(null);
+        
+        function RequestProfileData() {
+            // Silently acquires an access token which is then attached to a request for MS Graph data
+            instance
+                .acquireTokenSilent({
+                    ...loginRequest,
+                    account: accounts[0],
+                })
+                .then((response) => {
+                    callMsGraph(response.accessToken).then((response) => setGraphData(response));
+                });
+        }
+        
+        return (
+            <>
+                {accounts[0].name}
+            </>
+        );
+    };
+
     return (
         <div className={styles.layout}>
             <header className={styles.header} role={"banner"}>
@@ -49,7 +79,7 @@ const Layout = (props: any) => {
                         />  
                         */}                
                         <Link to="/" className={styles.headerTitleContainer}>
-                            <h3 className={styles.headerTitle}>Shadow Seller - </h3>{props.children}
+                            <h3 className={styles.headerTitle}>Shadow Seller -  {isAuthenticated ? <ProfileContent /> : "Not logged in"}</h3>
                         </Link>
                         <div className={styles.shareButtonContainer}>
                             {isAuthenticated ? <SignOutButton /> : <SignInButton />}
