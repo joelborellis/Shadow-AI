@@ -7,7 +7,6 @@ import { useEffect, useState } from "react";
 import { useIsAuthenticated } from "@azure/msal-react";
 import { SignInButton } from "../../components/Signin/SignInButton";
 import { SignOutButton } from "../../components/Signin/SignOutButton";
-import Navbar from "react-bootstrap/Navbar";
 
 const Layout = (props: any) => {
     const [isSharePanelOpen, setIsSharePanelOpen] = useState<boolean>(false);
