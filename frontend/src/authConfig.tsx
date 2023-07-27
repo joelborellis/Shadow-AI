@@ -13,7 +13,7 @@ import { LogLevel } from "@azure/msal-browser";
 
 export const msalConfig = {
     auth: {
-        clientId: "257d414f-fb14-42de-ae5a-a37f61797672",
+        clientId: "72d182a7-7b73-496f-b0d0-18fe34e4fb4f",
         authority: "https://login.microsoftonline.com/2a57864c-da2a-4a44-953c-9781f73f880a",
         redirectUri: "https://shadow-ai-app.azurewebsites.net/.auth/login/aad/callback",
     },
