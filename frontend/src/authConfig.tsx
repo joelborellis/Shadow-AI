@@ -15,7 +15,7 @@ export const msalConfig = {
     auth: {
         clientId: "257d414f-fb14-42de-ae5a-a37f61797672",
         authority: "https://login.microsoftonline.com/2a57864c-da2a-4a44-953c-9781f73f880a",
-        redirectUri: "https://shadow-ai-app.azurewebsites.net/",
+        redirectUri: "https://shadow-ai-app.azurewebsites.net/.auth/login/aad/callback",
     },
     cache: {
         cacheLocation: "sessionStorage", // This configures where your cache will be stored
