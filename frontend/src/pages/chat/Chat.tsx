@@ -10,6 +10,7 @@ import {
   ShieldLockRegular,
   Save16Regular,
   Settings16Filled,
+  Chat12Filled,
 } from "@fluentui/react-icons";
 
 import ReactMarkdown from "react-markdown";
@@ -402,7 +403,7 @@ const Chat = () => {
                   tabIndex={0}
                 />
           
-                <Settings16Filled
+                <Chat12Filled
                   className={styles.settingsIcon}
                   style={{
                     background:
