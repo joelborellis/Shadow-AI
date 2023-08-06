@@ -1,7 +1,7 @@
-import React from "react";
 import { useMsal } from "@azure/msal-react";
-import DropdownButton from "react-bootstrap/DropdownButton";
-import Dropdown from "react-bootstrap/Dropdown";
+import styles from "./SignIn.module.css";
+import { SignOutRegular } from "@fluentui/react-icons";
+
 
 /**
  * Renders a sign out button 
@@ -15,27 +15,23 @@ export const SignOutButton = () => {
         postLogoutRedirectUri: "/",
         mainWindowRedirectUri: "/",
       });
-    } else if (logoutType === "redirect") {
-      instance.logoutRedirect({
-        postLogoutRedirectUri: "/",
-      });
-    }
+    } 
   };
 
   return (
-    <DropdownButton
-      variant="secondary"
-      className="ml-auto"
-      drop="start"
-      title="Sign Out"
-      size="sm"
-    >
-      <Dropdown.Item as="button" onClick={() => handleLogout("popup")}>
-        Sign out using Popup
-      </Dropdown.Item>
-      <Dropdown.Item as="button" onClick={() => handleLogout("redirect")}>
-        Sign out using Redirect
-      </Dropdown.Item>
-    </DropdownButton>
+    <SignOutRegular
+      className={styles.signoutIcon}
+      style={{
+      background: "radial-gradient(109.81% 107.82% at 100.1% 90.19%, #0F6CBD 33.63%, #2D87C3 70.31%, #8DDDD8 100%)",
+      cursor: "pointer",
+      }}
+      onClick={() => handleLogout("popup")}
+      onKeyDown={(e) =>
+      e.key === "Enter" || e.key === " " ? handleLogout("popup") : null
+      }
+      aria-label="Logout"
+      role="button"
+      tabIndex={0}
+    />
   );
 };

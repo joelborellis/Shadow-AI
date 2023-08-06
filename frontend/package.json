@@ -11,8 +11,11 @@
   "dependencies": {
     "@azure/msal-browser": "^2.38.0",
     "@azure/msal-react": "^1.5.9",
-    "@fluentui/react": "^8.105.3",
+    "@fluentui/react": "^8.110.12",
     "@fluentui/react-icons": "^2.0.195",
+    "@syncfusion/ej2-react-buttons": "^22.2.5",
+    "@syncfusion/ej2-react-navigations": "^22.2.7",
+    "@types/node": "^20.4.5",
     "bootstrap": "^5.3.1",
     "lodash": "^4.17.21",
     "lodash-es": "^4.17.21",

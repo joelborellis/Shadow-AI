@@ -55,6 +55,7 @@ def should_use_data():
 
 def prepare_body_headers_with_data(request):
     request_messages = request.json["messages"]
+    print(request_messages)
 
     #with open('promp.json', 'w') as fp:
                 #fp.write(json.dumps(request_messages))
@@ -237,6 +238,25 @@ def conversation_without_data(request):
         else:
             return Response(None, mimetype='text/event-stream')
 
+def get_user_history(request):
+    
+    selected = request.json["selected"]
+    print(selected)
+    
+    response_obj = [
+  { "role": "user", "content": "good evening" },
+  {
+    "role": "assistant",
+    "content": "Good evening! How can I assist you today?"
+  },
+  { "role": "user", "content": "can you help with an upcoming call?" },
+  {
+    "role": "assistant",
+    "content": "Of course! I can help you with your upcoming call. What specific aspect of the call would you like assistance with?"
+  }
+]
+    return Response(json.dumps(response_obj), mimetype="application/json", status=200)
+
 @app.route("/conversation", methods=["GET", "POST"])
 def conversation():
     try:
@@ -247,6 +267,16 @@ def conversation():
             return conversation_without_data(request)
     except Exception as e:
         logging.exception("Exception in /conversation")
+        return jsonify({"error": str(e)}), 500
+    
+@app.route("/selecthistory", methods=["GET", "POST"])
+def getchathistory():
+    try:
+        #res = get_user_history(request)
+        #print("response:  ", res.get_data().decode("utf-8"))
+        return get_user_history(request)
+    except Exception as e:
+        logging.exception("Exception in /selecthistory")
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
