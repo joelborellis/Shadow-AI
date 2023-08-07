@@ -26,14 +26,14 @@ export async function getUserInfo(): Promise<UserInfo[]> {
     return payload;
 }
 
-export async function selectHistoryRequest(selected: string): Promise<Response> {
+export async function selectHistoryRequest(user: string): Promise<Response> {
     const response = await fetch("/selecthistory", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
         },
         body: JSON.stringify({
-            selected: selected
+            user: user
         }),
     });
 

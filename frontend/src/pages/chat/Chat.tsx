@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect, ChangeEvent } from "react";
+import { useRef, useState, useEffect } from "react";
 import {
   Stack,
   Panel,
@@ -8,8 +8,6 @@ import {
   DismissRegular,
   SquareRegular,
   ShieldLockRegular,
-  Save16Regular,
-  Settings16Filled,
   Chat12Filled,
 } from "@fluentui/react-icons";
 
@@ -29,12 +27,15 @@ import {
   ChatResponse,
   getUserInfo,
   selectHistoryRequest,
+  Conversation,
 } from "../../api";
 import { Answer } from "../../components/Answer";
 import { QuestionInput } from "../../components/QuestionInput";
+import { SaveInput } from "../../components/SaveInput";
+import { ChatLoad } from "../../components/ChatLoad";
 import { useIsAuthenticated, useMsal } from "@azure/msal-react";
 import { loginRequest } from "../../authConfig";
-import { DropdownButton, Dropdown } from "react-bootstrap";
+import { Dropdown } from "react-bootstrap";
 
 
 const Chat = () => {
@@ -53,14 +54,15 @@ const Chat = () => {
         metadata: string
       ]
     >();
-  const [isCitationPanelOpen, setIsCitationPanelOpen] = useState<boolean>(false);
+  const [isCitationPanelOpen, setIsCitationPanelOpen] =
+    useState<boolean>(false);
   const [answers, setAnswers] = useState<ChatMessage[]>([]);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
   const abortFuncs = useRef([] as AbortController[]);
   const [showAuthMessage, setShowAuthMessage] = useState<boolean>(true);
   const { instance, accounts } = useMsal();
   const isAuthenticated = useIsAuthenticated();
   const [isOpen, setIsOpen] = useState<boolean>(false);
-
 
   const getUserInfoList = async () => {
     const userInfoList = await getUserInfo();
@@ -150,11 +152,11 @@ const Chat = () => {
         conversationText = "";
       } catch {}
     });
-
-    document.write(JSON.stringify(result));
+    alert(JSON.stringify(result));
   };
 
   const dismissPanel = async () => {
+    setConversations([]);
     setIsOpen(false);
   };
 
@@ -166,24 +168,39 @@ const Chat = () => {
 
   const populateChat = async (selected: string) => {
 
+  }
+
+  const selectHistory = async (user: string) => {
     //alert(selected);
 
     // Silently acquires an access token which is then attached to a request for MS Graph data
     //instance.acquireTokenSilent({
-      //...loginRequest,
-      //account: accounts[0],
+    //...loginRequest,
+    //account: accounts[0],
     //});
 
     //let user = accounts[0].username;
+    setIsOpen(true);
 
-    const r = await selectHistoryRequest(selected);
+    const r = await selectHistoryRequest(user);
     const rJson = await r.json();
 
-    let chatMessages: ChatMessage[] = rJson;
+
+    let conversations: Conversation[] = [];
+
+    rJson.forEach((convo: Conversation) => {
+      conversations.push(convo);
+    });
+
+    setConversations(conversations);
+    //document.write(conversations.length.toString());
+    //document.write(JSON.stringify(conversations));
+
+    //let chatMessages: ChatMessage[] = rJson;
     //document.write(JSON.stringify(chatMessages))
     //alert(rJson[0].content);  //get the first user content message to display as the chat
-    setIsOpen(false);
-    setAnswers(chatMessages);
+    //setIsOpen(false);
+    //setAnswers(chatMessages);
   };
 
   const clearChat = async () => {
@@ -342,8 +359,9 @@ const Chat = () => {
                 <div ref={chatMessageStreamEnd} />
               </div>
             )}
-
+            
             <Stack horizontal className={styles.chatInput}>
+            
               {isLoading && (
                 <Stack
                   horizontal
@@ -352,7 +370,7 @@ const Chat = () => {
                   aria-label="Stop generating"
                   tabIndex={0}
                   onClick={stopGenerating}
-                  onKeyDown={(e: { key: string; }) =>
+                  onKeyDown={(e: { key: string }) =>
                     e.key === "Enter" || e.key === " " ? stopGenerating() : null
                   }
                 >
@@ -385,41 +403,16 @@ const Chat = () => {
                 role="button"
                 tabIndex={0}
               />
-                <Save16Regular
-                  className={styles.saveIcon}
-                  style={{
-                    background:
-                      isLoading || answers.length === 0
-                        ? "#BDBDBD"
-                        : "radial-gradient(109.81% 107.82% at 100.1% 90.19%, #0F6CBD 33.63%, #2D87C3 70.31%, #8DDDD8 100%)",
-                    cursor: isLoading || answers.length === 0 ? "" : "pointer",
-                  }}
-                  onClick={saveChat}
-                  onKeyDown={(e) =>
-                    e.key === "Enter" || e.key === " " ? saveChat() : null
-                  }
-                  aria-label="Save Conversation"
-                  role="button"
-                  tabIndex={0}
-                />
-          
-                <Chat12Filled
-                  className={styles.settingsIcon}
-                  style={{
-                    background:
-                      isLoading || answers.length === 0
-                        ? "#BDBDBD"
-                        : "radial-gradient(109.81% 107.82% at 100.1% 90.19%, #0F6CBD 33.63%, #2D87C3 70.31%, #8DDDD8 100%)",
-                    cursor: isLoading || answers.length === 0 ? "" : "pointer",
-                  }}
-                  onClick={openPanel}
-                  onKeyDown={(e) =>
-                    e.key === "Enter" || e.key === " " ? openPanel() : null
-                  }
-                  aria-label="Settings"
-                  role="button"
-                  tabIndex={0}
-                />
+
+              <SaveInput
+                disabled={isLoading || answers.length === 0}
+                onSave={() => saveChat()}
+              />
+
+              <ChatLoad
+                disabled={isLoading || answers.length === 0}
+                onLoad={() => selectHistory("joelborellis@outlook.com")}
+              />
 
               {isOpen && (
                 <Panel
@@ -429,26 +422,30 @@ const Chat = () => {
                   isOpen={isOpen}
                   onDismiss={dismissPanel}
                   closeButtonAriaLabel="Close"
-                >   
-
-                <Dropdown
-                      className="ml-auto"
-                      drop="start"
-                      title="Choose a chat to load"
+                >
+                  <Dropdown
+                    className="ml-auto"
+                    drop="start"
+                    title="Choose a chat to load"
+                  >
+                    
+                    <Dropdown.Item
+                      as="button"
+                      onClick={() => populateChat("popup")}
                     >
-                      <Dropdown.Item as="button" onClick={() => populateChat("popup")}>
-                        Placeholder Chat History
-                      </Dropdown.Item>
-                </Dropdown>
-                
+                      {conversations.length}
+                    </Dropdown.Item>
+                  </Dropdown>
                 </Panel>
               )}
+
               <QuestionInput
                 clearOnSend
                 placeholder="Talk to me about your sales pursuits..."
                 disabled={isLoading}
                 onSend={(question) => makeApiRequest(question)}
               />
+              
             </Stack>
           </div>
           {answers.length > 0 && isCitationPanelOpen && activeCitation && (

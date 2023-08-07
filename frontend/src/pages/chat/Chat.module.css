@@ -159,25 +159,6 @@
     z-index: 1;
 }
 
-.settingsIcon {
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    padding: 8px;
-    position: relative;
-    width: 40px;
-    height: 40px;
-    right: 188px;
-    top: 18px;
-    color: #FFFFFF;
-    border: 1px solid #D1D1D1;
-    border-radius: 20px;
-    z-index: 1;
-}
-
-
 .saveChatBroom {
     box-sizing: border-box;
     display: flex;

@@ -26,6 +26,10 @@ export type ChatMessage = {
     end_turn?: boolean;
 };
 
+export type Conversation = {
+    messages: ChatMessage[];
+};
+
 export enum ChatCompletionType {
     ChatCompletion = "chat.completion",
     ChatCompletionChunk = "chat.completion.chunk"
