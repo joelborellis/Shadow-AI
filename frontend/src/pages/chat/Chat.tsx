@@ -8,7 +8,6 @@ import {
   DismissRegular,
   SquareRegular,
   ShieldLockRegular,
-  Chat12Filled,
 } from "@fluentui/react-icons";
 
 import ReactMarkdown from "react-markdown";
@@ -28,6 +27,7 @@ import {
   getUserInfo,
   selectHistoryRequest,
   Conversation,
+  saveChatRequest,
 } from "../../api";
 import { Answer } from "../../components/Answer";
 import { QuestionInput } from "../../components/QuestionInput";
@@ -35,7 +35,7 @@ import { SaveInput } from "../../components/SaveInput";
 import { ChatLoad } from "../../components/ChatLoad";
 import { useIsAuthenticated, useMsal } from "@azure/msal-react";
 import { loginRequest } from "../../authConfig";
-import { Dropdown } from "react-bootstrap";
+import { Button, Dropdown } from "react-bootstrap";
 
 
 const Chat = () => {
@@ -54,8 +54,7 @@ const Chat = () => {
         metadata: string
       ]
     >();
-  const [isCitationPanelOpen, setIsCitationPanelOpen] =
-    useState<boolean>(false);
+  const [isCitationPanelOpen, setIsCitationPanelOpen] = useState<boolean>(false);
   const [answers, setAnswers] = useState<ChatMessage[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const abortFuncs = useRef([] as AbortController[]);
@@ -138,7 +137,7 @@ const Chat = () => {
     return abortController.abort();
   };
 
-  const saveChat = () => {
+  const saveChat = async (user: string) => {
     let conversationText = "";
     const arrayFromMapValues = Array.from(answers.values());
     let result = [] as ChatMessage[];
@@ -153,6 +152,8 @@ const Chat = () => {
       } catch {}
     });
     alert(JSON.stringify(result));
+    const r = await saveChatRequest(user, result);
+    const rJson = await r.json();
   };
 
   const dismissPanel = async () => {
@@ -161,18 +162,26 @@ const Chat = () => {
   };
 
   const openPanel = async () => {
-    // clear answers
-    setAnswers([]);
     setIsOpen(true);
   };
 
-  const populateChat = async (selected: string) => {
-
+  const populateChat = async (selected: string)=> {
+    alert(selected);
+    setConversations([]);
+    setIsOpen(false);
   }
 
-  const selectHistory = async (user: string) => {
-    //alert(selected);
+  const parseConversationId = (conversation: Conversation) => {
+      try {
+        const sJson = JSON.stringify(conversation);
+        const pJson = JSON.parse(sJson) as Conversation;
+        return pJson.id;
+      } catch {
+        return "";
+      }
+  };
 
+  const selectHistory = async (user: string) => {
     // Silently acquires an access token which is then attached to a request for MS Graph data
     //instance.acquireTokenSilent({
     //...loginRequest,
@@ -185,22 +194,21 @@ const Chat = () => {
     const r = await selectHistoryRequest(user);
     const rJson = await r.json();
 
+    const conversations = [] as Conversation[];
 
-    let conversations: Conversation[] = [];
-
-    rJson.forEach((convo: Conversation) => {
-      conversations.push(convo);
-    });
-
-    setConversations(conversations);
-    //document.write(conversations.length.toString());
-    //document.write(JSON.stringify(conversations));
-
-    //let chatMessages: ChatMessage[] = rJson;
-    //document.write(JSON.stringify(chatMessages))
-    //alert(rJson[0].content);  //get the first user content message to display as the chat
-    //setIsOpen(false);
-    //setAnswers(chatMessages);
+    const arrayFromMapValues = Array.from(rJson.values());
+    let convoText = "";
+    arrayFromMapValues.forEach((val) => {
+      convoText += JSON.stringify(val)
+      let conversation = {} as Conversation;
+      conversation = JSON.parse(convoText);
+      //alert(JSON.stringify(conversation));
+      conversations.push(conversation);
+      setConversations(conversations);
+      convoText = "";
+    })
+    //alert(conversations.length);
+    //alert(parseConversationId(conversations[0]));
   };
 
   const clearChat = async () => {
@@ -315,7 +323,7 @@ const Chat = () => {
                 className={styles.chatMessageStream}
                 style={{ marginBottom: isLoading ? "40px" : "0px" }}
               >
-                {answers.map((answer, index) => (
+                {answers.map((answer, index) => ( 
                   <>
                     {answer.role === "user" ? (
                       <div className={styles.chatMessageUser}>
@@ -406,7 +414,7 @@ const Chat = () => {
 
               <SaveInput
                 disabled={isLoading || answers.length === 0}
-                onSave={() => saveChat()}
+                onSave={() => saveChat("joelborellis@outlook.com")}
               />
 
               <ChatLoad
@@ -428,13 +436,21 @@ const Chat = () => {
                     drop="start"
                     title="Choose a chat to load"
                   >
-                    
+                    {conversations.map((conversation: Conversation) => (         
+                    <div>
+                    {/* mapping over the conversations array and displaying each item */}   
+                                       
                     <Dropdown.Item
-                      as="button"
-                      onClick={() => populateChat("popup")}
+                        as="button"
+                        onClick={() => populateChat(parseConversationId(conversation))}
                     >
-                      {conversations.length}
-                    </Dropdown.Item>
+                      {parseConversationId(conversation)} 
+                                     
+                    </Dropdown.Item>   
+                                    
+                    </div>    
+                    ))}                        
+                    
                   </Dropdown>
                 </Panel>
               )}

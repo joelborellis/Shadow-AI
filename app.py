@@ -244,39 +244,48 @@ def get_user_history(request):
     print(selected)
     
     response_obj = [
-  [
-    { "role": "user", "content": "good afternoon" },
     {
-      "role": "assistant",
-      "content": "Good afternoon! How can I assist you today?"
-    },
-    { "role": "user", "content": "can you help with an upcoming sales call" },
-    {
-      "role": "assistant",
-      "content": "Of course! I can definitely help you with your upcoming sales call. What specific aspect of the sales call would you like assistance with? Are you looking for tips on building rapport, handling objections, or closing the deal? Let me know so I can provide you with the most relevant information."
-    },
-    { "role": "user", "content": "i need to create an aganda" },
-    {
-      "role": "assistant",
-      "content": "When creating an agenda for your sales call, it's important to consider the key elements that will help you effectively communicate your message and achieve your objectives. Here are some steps you can follow to create a comprehensive agenda:\n\n1. Introduction: Start the call by introducing yourself and establishing rapport with the prospect. Make sure to create a positive and engaging atmosphere.\n\n2. Purpose of the Call: Clearly state the purpose of the call and what you hope to achieve. This will help set expectations and keep the conversation focused.\n\n3. Agenda Overview: Provide a brief overview of the topics you will cover during the call. This will give the prospect an idea of what to expect and help them prepare any questions or concerns they may have.\n\n4. Background and Needs Discovery: Spend some time understanding the prospect's background, challenges, and needs. Ask open-ended questions to encourage them to share relevant information.\n\n5. Value Proposition: Present your value proposition and explain how your product or service can address the prospect's specific needs and challenges. Highlight the unique benefits and advantages you offer.\n\n6. Product or Service Demonstration: If applicable, provide a demonstration of your product or service to showcase its features and functionality. Tailor the demonstration to address the prospect's specific pain points.\n\n7. Addressing Objections: Anticipate and address any potential objections or concerns the prospect may have. Be prepared with persuasive responses and examples that demonstrate how your offering can overcome those objections.\n\n8. Pricing and Terms: Discuss pricing options and any relevant terms or conditions. Be transparent and provide clear explanations to ensure the prospect understands the value they will receive.\n\n9. Next Steps: Outline the next steps in the sales process, such as scheduling a follow-up call, providing additional information, or arranging a product trial. Clearly communicate the actions you expect from both parties.\n\n10. Closing Remarks: End the call on a positive note, expressing gratitude for the prospect's time and interest. Reiterate your commitment to supporting their needs and offer any additional assistance they may require.\n\nRemember, the agenda should be flexible and adaptable to the prospect's specific situation and needs. Be prepared to adjust the agenda based on their responses and engagement during the call.\n\n[doc1], [doc2], and [doc3] provide valuable insights and strategies for creating an effective sales call agenda. You can refer to these documents for more detailed information and examples.\n\nLet me know if there's anything else I can assist you with!"
+      "id": "1",
+      "messages": [
+        { "role": "user", "content": "Hello" },
+        { "role": "assistant", "content": "Hello, how can i help you" },
+        { "role": "user", "content": "Hello" },
+        { "role": "assistant", "content": "Hello, how can i help you" },
+        { "role": "user", "content": "Hello" },
+        { "role": "assistant", "content": "Hello, how can i help you" }
+      ]
     }
-  ],
-  [
-    { "role": "user", "content": "good afternoon" },
+  ,
+  
     {
-      "role": "assistant",
-      "content": "Good afternoon! How can I assist you today?"
+      "id": "2",
+      "messages": [
+        { "role": "user", "content": "Hello 2" },
+        { "role": "assistant", "content": "Hello, how can i help you" },
+        { "role": "user", "content": "Hello 2" },
+        { "role": "assistant", "content": "Hello, how can i help you" }
+      ]
     }
-  ],
-  [
-    { "role": "user", "content": "hey i need help with an upcoming call" },
+  ,
+  
     {
-      "role": "assistant",
-      "content": "Sure, I'm happy to help, lets figure out how we can create an agenda"
+      "id": "3",
+      "messages": [
+        { "role": "user", "content": "Hello 3" },
+        { "role": "assistant", "content": "Hello, how can i help you" },
+        { "role": "user", "content": "Hello 2" },
+        { "role": "assistant", "content": "Hello, how can i help you" }
+      ]
     }
-  ]
 ]
     return Response(json.dumps(response_obj), mimetype="application/json", status=200)
+
+def save_chat(request):
+    
+    messages = request.json["messages"]
+    print(messages)
+    
+    return Response(mimetype="application/json", status=200)
 
 @app.route("/conversation", methods=["GET", "POST"])
 def conversation():
@@ -296,6 +305,14 @@ def getchathistory():
         #res = get_user_history(request)
         #print("response:  ", res.get_data().decode("utf-8"))
         return get_user_history(request)
+    except Exception as e:
+        logging.exception("Exception in /selecthistory")
+        return jsonify({"error": str(e)}), 500
+    
+@app.route("/savechat", methods=["GET", "POST"])
+def savechat():
+    try:
+        return save_chat(request)
     except Exception as e:
         logging.exception("Exception in /selecthistory")
         return jsonify({"error": str(e)}), 500

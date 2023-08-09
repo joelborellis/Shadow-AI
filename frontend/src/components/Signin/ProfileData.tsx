@@ -10,7 +10,7 @@
 export const ProfileData = (props: any) => {
   return (
     <>
-    {props.graphData.givenName}
+    {props.graphData.surname}
     </>
   );
 };

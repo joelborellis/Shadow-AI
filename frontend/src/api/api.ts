@@ -39,3 +39,18 @@ export async function selectHistoryRequest(user: string): Promise<Response> {
 
     return response;
 }
+
+export async function saveChatRequest(user: string, messages: ChatMessage[]): Promise<Response> {
+    const response = await fetch("/savechat", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            user: user,
+            messages: messages
+        }),
+    });
+
+    return response;
+}

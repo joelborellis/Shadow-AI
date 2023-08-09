@@ -27,6 +27,7 @@ export type ChatMessage = {
 };
 
 export type Conversation = {
+    id: string;
     messages: ChatMessage[];
 };
 
