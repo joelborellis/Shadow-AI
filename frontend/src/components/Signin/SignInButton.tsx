@@ -12,7 +12,7 @@ export const SignInButton = () => {
   const { instance } = useMsal();
 
   const handleLogin = (loginType: any) => {
-    if (loginType === "popup") {
+    if (loginType === "redirect") {
       instance.loginRedirect(loginRequest).catch(e => {
         console.log(e);
       });
@@ -25,9 +25,9 @@ export const SignInButton = () => {
       background: "radial-gradient(109.81% 107.82% at 100.1% 90.19%, #0F6CBD 33.63%, #2D87C3 70.31%, #8DDDD8 100%)",
       cursor: "pointer",
       }}
-      onClick={() => handleLogin("popup")}
+      onClick={() => handleLogin("redirect")}
       onKeyDown={(e) =>
-      e.key === "Enter" || e.key === " " ? handleLogin("popup") : null
+      e.key === "Enter" || e.key === " " ? handleLogin("redirect") : null
       }
       aria-label="Login"
       role="button"

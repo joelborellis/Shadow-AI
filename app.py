@@ -285,6 +285,14 @@ def save_chat(request):
     messages = request.json["messages"]
     print(messages)
     
+    conversation = {
+    "id": "1", 
+    "title": "Title",
+    "messages": messages
+}
+    
+    print(json.dumps(conversation))
+    
     return Response(mimetype="application/json", status=200)
 
 @app.route("/conversation", methods=["GET", "POST"])

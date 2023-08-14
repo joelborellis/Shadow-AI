@@ -144,11 +144,13 @@ const Chat = () => {
     // Loop over the array
     arrayFromMapValues.forEach((val) => {
       try {
-        if (val.role != "tool") conversationText += JSON.stringify(val);
+        if (val.role != "tool") {
+        conversationText += JSON.stringify(val);
         let chatMessage = {} as ChatMessage;
         chatMessage = JSON.parse(conversationText);
         result.push(chatMessage);
         conversationText = "";
+        }
       } catch {}
     });
     alert(JSON.stringify(result));
