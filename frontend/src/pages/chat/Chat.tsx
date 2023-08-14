@@ -31,8 +31,8 @@ import {
 } from "../../api";
 import { Answer } from "../../components/Answer";
 import { QuestionInput } from "../../components/QuestionInput";
-import { SaveInput } from "../../components/SaveInput";
-import { ChatLoad } from "../../components/ChatLoad";
+import { SaveButton } from "../../components/SaveButton";
+import { ChatHistory } from "../../components/ChatHistory";
 import { useIsAuthenticated, useMsal } from "@azure/msal-react";
 import { loginRequest } from "../../authConfig";
 import { Button, Dropdown } from "react-bootstrap";
@@ -414,12 +414,12 @@ const Chat = () => {
                 tabIndex={0}
               />
 
-              <SaveInput
+              <SaveButton
                 disabled={isLoading || answers.length === 0}
                 onSave={() => saveChat("joelborellis@outlook.com")}
               />
 
-              <ChatLoad
+              <ChatHistory
                 disabled={isLoading || answers.length === 0}
                 onLoad={() => selectHistory("joelborellis@outlook.com")}
               />
@@ -440,16 +440,12 @@ const Chat = () => {
                   >
                     {conversations.map((conversation: Conversation) => (         
                     <div>
-                    {/* mapping over the conversations array and displaying each item */}   
-                                       
+                    {/* mapping over the conversations array and displaying each item */}                                      
                     <Dropdown.Item
                         as="button"
-                        onClick={() => populateChat(parseConversationId(conversation))}
-                    >
-                      {parseConversationId(conversation)} 
-                                     
-                    </Dropdown.Item>   
-                                    
+                        onClick={() => populateChat(parseConversationId(conversation))}              >
+                      {parseConversationId(conversation)}                                 
+                    </Dropdown.Item>                                    
                     </div>    
                     ))}                        
                     
