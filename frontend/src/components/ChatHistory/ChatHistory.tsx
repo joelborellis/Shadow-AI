@@ -9,9 +9,9 @@ interface Props {
 export const ChatHistory = ({ onLoad, disabled }: Props) => {
 
   const loadChat = () => {
-    //if (disabled || chat.length == 0) {
-    //return;
-    //}
+    if (disabled) {
+    return;
+    }
     onLoad();
 
   };

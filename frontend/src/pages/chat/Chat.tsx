@@ -1,7 +1,14 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, ChangeEvent, FormEvent, SetStateAction } from "react";
 import {
   Stack,
   Panel,
+  mergeStyleSets,
+  Layer,
+  Popup,
+  FocusTrapZone,
+  DefaultButton,
+  Overlay,
+  TextField,
 } from "@fluentui/react";
 import {
   BroomRegular,
@@ -27,7 +34,7 @@ import {
   getUserInfo,
   selectHistoryRequest,
   Conversation,
-  saveChatRequest,
+  saveConversation,
 } from "../../api";
 import { Answer } from "../../components/Answer";
 import { QuestionInput } from "../../components/QuestionInput";
@@ -35,7 +42,27 @@ import { SaveButton } from "../../components/SaveButton";
 import { ChatHistory } from "../../components/ChatHistory";
 import { useIsAuthenticated, useMsal } from "@azure/msal-react";
 import { loginRequest } from "../../authConfig";
-import { Button, Dropdown } from "react-bootstrap";
+import { Dropdown } from "react-bootstrap";
+
+const popupStyles = mergeStyleSets({
+  root: {
+    background: 'rgba(0, 0, 0, 0.2)',
+    bottom: '0',
+    left: '0',
+    position: 'fixed',
+    right: '0',
+    top: '0',
+  },
+  content: {
+    background: 'white',
+    left: '50%',
+    maxWidth: '400px',
+    padding: '0 2em 2em',
+    position: 'absolute',
+    top: '50%',
+    transform: 'translate(-50%, -50%)',
+  },
+});
 
 
 const Chat = () => {
@@ -62,6 +89,8 @@ const Chat = () => {
   const { instance, accounts } = useMsal();
   const isAuthenticated = useIsAuthenticated();
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [isPopupVisible, setPopupVisible] = useState<boolean>(false);
+  const [chatTitleText, setChatTitleText] = useState("");
 
   const getUserInfoList = async () => {
     const userInfoList = await getUserInfo();
@@ -137,7 +166,13 @@ const Chat = () => {
     return abortController.abort();
   };
 
-  const saveChat = async (user: string) => {
+  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setChatTitleText(event.target.value);
+  };
+
+  const saveChat = async () => {
+    setPopupVisible(false);
+    //setChatTitleText(chatTitleText);
     let conversationText = "";
     const arrayFromMapValues = Array.from(answers.values());
     let result = [] as ChatMessage[];
@@ -153,22 +188,28 @@ const Chat = () => {
         }
       } catch {}
     });
-    alert(JSON.stringify(result));
-    const r = await saveChatRequest(user, result);
+    //alert(JSON.stringify(result));
+    //alert(chatTitleText);
+    const r = await saveConversation("joelborellis@outlook.com", chatTitleText, result);
     const rJson = await r.json();
   };
+
+  const openSaveConvo = async () => {
+    setChatTitleText("");
+    setPopupVisible(true);
+  }
 
   const dismissPanel = async () => {
     setConversations([]);
     setIsOpen(false);
   };
 
-  const openPanel = async () => {
-    setIsOpen(true);
+  const hidePopup = async () => {
+    setPopupVisible(false);
   };
 
   const populateChat = async (selected: string)=> {
-    alert(selected);
+    //alert(selected);
     setConversations([]);
     setIsOpen(false);
   }
@@ -182,6 +223,16 @@ const Chat = () => {
         return "";
       }
   };
+
+  const parseConversationTitle = (conversation: Conversation) => {
+    try {
+      const sJson = JSON.stringify(conversation);
+      const pJson = JSON.parse(sJson) as Conversation;
+      return pJson.title;
+    } catch {
+      return "";
+    }
+};
 
   const selectHistory = async (user: string) => {
     // Silently acquires an access token which is then attached to a request for MS Graph data
@@ -416,8 +467,37 @@ const Chat = () => {
 
               <SaveButton
                 disabled={isLoading || answers.length === 0}
-                onSave={() => saveChat("joelborellis@outlook.com")}
+                onSave={() => openSaveConvo()}
               />
+
+              {isPopupVisible && (
+                    <Layer>
+                      <Popup
+                        className={popupStyles.root}
+                        role="dialog"
+                        aria-modal="true"
+                        onDismiss={hidePopup}
+                      >
+                        <Overlay onChange={handleChange} />
+                        <FocusTrapZone>
+                          <div role="document" className={popupStyles.content}>
+                            <h2>Title of Conversation</h2>
+                            <p>
+                              <input
+                                type="text"
+                                id="chatTitleText"
+                                name="chatTitleText"
+                                onChange={handleChange}
+                                value={chatTitleText}
+                              />
+                            </p>
+                            <DefaultButton onClick={saveChat}>Save</DefaultButton>
+                          </div>
+                        </FocusTrapZone>
+                      </Popup>
+                    </Layer>
+                  )}
+
 
               <ChatHistory
                 disabled={isLoading || answers.length === 0}
@@ -444,7 +524,7 @@ const Chat = () => {
                     <Dropdown.Item
                         as="button"
                         onClick={() => populateChat(parseConversationId(conversation))}              >
-                      {parseConversationId(conversation)}                                 
+                      {parseConversationTitle(conversation)}                                 
                     </Dropdown.Item>                                    
                     </div>    
                     ))}                        

@@ -5,6 +5,10 @@ import requests
 import openai
 from flask import Flask, Response, request, jsonify
 from dotenv import load_dotenv
+import azure.cosmos.documents as documents
+import azure.cosmos.cosmos_client as cosmos_client
+import base64
+import uuid
 
 load_dotenv()
 
@@ -42,6 +46,11 @@ AZURE_OPENAI_STREAM = os.environ.get("AZURE_OPENAI_STREAM", "true")
 AZURE_OPENAI_MODEL_NAME = os.environ.get("AZURE_OPENAI_MODEL_NAME") # Name of the model, e.g. 'gpt-35-turbo' or 'gpt-4'
 
 SHOULD_STREAM = True if AZURE_OPENAI_STREAM.lower() == "true" else False
+
+HOST = os.environ.get("HOST")
+MASTER_KEY = os.environ.get("MASTER_KEY")
+DATABASE_ID = os.environ.get("DATABASE_ID")
+CONTAINER_ID = os.environ.get("CONTAINER_ID")
 
 def is_chat_model():
     if 'gpt-35' in AZURE_OPENAI_MODEL_NAME.lower():
@@ -117,8 +126,8 @@ def stream_with_data(body, headers, endpoint):
         }]
     }
     try:
-        print(endpoint)
-        print(headers)
+        #print(endpoint)
+        #print(headers)
         with s.post(endpoint, json=body, headers=headers, stream=True) as r:
             collected_messages = []
             for line in r.iter_lines(chunk_size=10):
@@ -240,58 +249,48 @@ def conversation_without_data(request):
 
 def get_user_history(request):
     
-    selected = request.json["user"]
-    print(selected)
+    user = request.json["user"]
     
-    response_obj = [
-    {
-      "id": "1",
-      "messages": [
-        { "role": "user", "content": "Hello" },
-        { "role": "assistant", "content": "Hello, how can i help you" },
-        { "role": "user", "content": "Hello" },
-        { "role": "assistant", "content": "Hello, how can i help you" },
-        { "role": "user", "content": "Hello" },
-        { "role": "assistant", "content": "Hello, how can i help you" }
-      ]
-    }
-  ,
-  
-    {
-      "id": "2",
-      "messages": [
-        { "role": "user", "content": "Hello 2" },
-        { "role": "assistant", "content": "Hello, how can i help you" },
-        { "role": "user", "content": "Hello 2" },
-        { "role": "assistant", "content": "Hello, how can i help you" }
-      ]
-    }
-  ,
-  
-    {
-      "id": "3",
-      "messages": [
-        { "role": "user", "content": "Hello 3" },
-        { "role": "assistant", "content": "Hello, how can i help you" },
-        { "role": "user", "content": "Hello 2" },
-        { "role": "assistant", "content": "Hello, how can i help you" }
-      ]
-    }
-]
-    return Response(json.dumps(response_obj), mimetype="application/json", status=200)
+    client = cosmos_client.CosmosClient(HOST, {'masterKey': MASTER_KEY}, user_agent="ShadowSellerAgent", user_agent_overwrite=True)
+      
+    db = client.get_database_client(DATABASE_ID)
+    #print('Database with id \'{0}\' was found'.format(DATABASE_ID))
+    container = db.get_container_client(CONTAINER_ID)
+    #print('Container with id \'{0}\' was found'.format(CONTAINER_ID))
+    
+    items = list(container.query_items(
+        query="SELECT * FROM r WHERE r.user=@user",
+        parameters=[
+            { "name":"@user", "value": user }
+        ],
+        enable_cross_partition_query=True,
+    ))
 
-def save_chat(request):
-    
-    messages = request.json["messages"]
-    print(messages)
-    
+    return Response(json.dumps(items), mimetype="application/json", status=200)
+
+# get a UUID - URL safe, Base64
+def get_a_uuid():
+    return str(uuid.uuid4())
+
+def save_conversation(request):
+
+    client = cosmos_client.CosmosClient(HOST, {'masterKey': MASTER_KEY}, user_agent="ShadowSellerAgent", user_agent_overwrite=True)
+      
+    db = client.get_database_client(DATABASE_ID)
+    #print('Database with id \'{0}\' was found'.format(DATABASE_ID))
+    container = db.get_container_client(CONTAINER_ID)
+    #print('Container with id \'{0}\' was found'.format(CONTAINER_ID))
+      
     conversation = {
-    "id": "1", 
-    "title": "Title",
-    "messages": messages
+    "id": get_a_uuid(),
+    "title": request.json["title"],
+    "user": request.json["user"],
+    "messages": request.json["messages"]
 }
     
-    print(json.dumps(conversation))
+    container.create_item(body=conversation)
+    
+    #print(json.dumps(conversation))
     
     return Response(mimetype="application/json", status=200)
 
@@ -317,12 +316,12 @@ def getchathistory():
         logging.exception("Exception in /selecthistory")
         return jsonify({"error": str(e)}), 500
     
-@app.route("/savechat", methods=["GET", "POST"])
+@app.route("/saveconversation", methods=["GET", "POST"])
 def savechat():
     try:
-        return save_chat(request)
+        return save_conversation(request)
     except Exception as e:
-        logging.exception("Exception in /selecthistory")
+        logging.exception("Exception in /saveconversation")
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
