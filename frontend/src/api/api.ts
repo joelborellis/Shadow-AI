@@ -26,8 +26,8 @@ export async function getUserInfo(): Promise<UserInfo[]> {
     return payload;
 }
 
-export async function selectHistoryRequest(user: string): Promise<Response> {
-    const response = await fetch("/selecthistory", {
+export async function selectConversationHistory(user: string): Promise<Response> {
+    const response = await fetch("/selectconversationhistory", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"

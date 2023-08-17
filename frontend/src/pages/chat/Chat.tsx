@@ -1,14 +1,12 @@
-import { useRef, useState, useEffect, ChangeEvent, FormEvent, SetStateAction } from "react";
+import { useRef, useState, useEffect, ChangeEvent } from "react";
 import {
   Stack,
   Panel,
-  mergeStyleSets,
   Layer,
   Popup,
   FocusTrapZone,
   DefaultButton,
   Overlay,
-  TextField,
 } from "@fluentui/react";
 import {
   BroomRegular,
@@ -32,7 +30,7 @@ import {
   ToolMessageContent,
   ChatResponse,
   getUserInfo,
-  selectHistoryRequest,
+  selectConversationHistory,
   Conversation,
   saveConversation,
 } from "../../api";
@@ -43,26 +41,6 @@ import { ChatHistory } from "../../components/ChatHistory";
 import { useIsAuthenticated, useMsal } from "@azure/msal-react";
 import { loginRequest } from "../../authConfig";
 import { Dropdown } from "react-bootstrap";
-
-const popupStyles = mergeStyleSets({
-  root: {
-    background: 'rgba(0, 0, 0, 0.2)',
-    bottom: '0',
-    left: '0',
-    position: 'fixed',
-    right: '0',
-    top: '0',
-  },
-  content: {
-    background: 'white',
-    left: '50%',
-    maxWidth: '400px',
-    padding: '0 2em 2em',
-    position: 'absolute',
-    top: '50%',
-    transform: 'translate(-50%, -50%)',
-  },
-});
 
 
 const Chat = () => {
@@ -170,6 +148,12 @@ const Chat = () => {
     setChatTitleText(event.target.value);
   };
 
+  const cancelConversation = () => {
+    setChatTitleText("");
+    setPopupVisible(false);
+  };
+
+
   const saveChat = async () => {
     setPopupVisible(false);
     //setChatTitleText(chatTitleText);
@@ -208,21 +192,18 @@ const Chat = () => {
     setPopupVisible(false);
   };
 
-  const populateChat = async (selected: string)=> {
+  const populateConversation = async (conversation: Conversation)=> {
     //alert(selected);
+    const sJson = JSON.stringify(conversation);
+    const pJson = JSON.parse(sJson) as Conversation;
+
+    //document.write(JSON.stringify(pJson.messages));
+
+    setAnswers(pJson.messages);
+
     setConversations([]);
     setIsOpen(false);
   }
-
-  const parseConversationId = (conversation: Conversation) => {
-      try {
-        const sJson = JSON.stringify(conversation);
-        const pJson = JSON.parse(sJson) as Conversation;
-        return pJson.id;
-      } catch {
-        return "";
-      }
-  };
 
   const parseConversationTitle = (conversation: Conversation) => {
     try {
@@ -242,9 +223,10 @@ const Chat = () => {
     //});
 
     //let user = accounts[0].username;
+    setAnswers([]);
     setIsOpen(true);
 
-    const r = await selectHistoryRequest(user);
+    const r = await selectConversationHistory(user);
     const rJson = await r.json();
 
     const conversations = [] as Conversation[];
@@ -260,8 +242,6 @@ const Chat = () => {
       setConversations(conversations);
       convoText = "";
     })
-    //alert(conversations.length);
-    //alert(parseConversationId(conversations[0]));
   };
 
   const clearChat = async () => {
@@ -473,15 +453,15 @@ const Chat = () => {
               {isPopupVisible && (
                     <Layer>
                       <Popup
-                        className={popupStyles.root}
+                        className={styles.popupRoot}
                         role="dialog"
                         aria-modal="true"
                         onDismiss={hidePopup}
                       >
                         <Overlay onChange={handleChange} />
                         <FocusTrapZone>
-                          <div role="document" className={popupStyles.content}>
-                            <h2>Title of Conversation</h2>
+                          <div role="document" className={styles.popupContent}>
+                            <h5>Title of Conversation</h5>
                             <p>
                               <input
                                 type="text"
@@ -492,6 +472,7 @@ const Chat = () => {
                               />
                             </p>
                             <DefaultButton onClick={saveChat}>Save</DefaultButton>
+                            <DefaultButton onClick={cancelConversation}>Cancel</DefaultButton>
                           </div>
                         </FocusTrapZone>
                       </Popup>
@@ -506,7 +487,7 @@ const Chat = () => {
 
               {isOpen && (
                 <Panel
-                  headerText="Settings"
+                  headerText="Conversation History"
                   // this prop makes the panel non-modal
                   isBlocking={false}
                   isOpen={isOpen}
@@ -514,20 +495,21 @@ const Chat = () => {
                   closeButtonAriaLabel="Close"
                 >
                   <Dropdown
-                    className="ml-auto"
+                    className="d-inline mx-2"
                     drop="start"
                     title="Choose a chat to load"
                   >
-                    {conversations.map((conversation: Conversation) => (         
+                  {conversations.map((conversation: Conversation) => (         
                     <div>
                     {/* mapping over the conversations array and displaying each item */}                                      
                     <Dropdown.Item
                         as="button"
-                        onClick={() => populateChat(parseConversationId(conversation))}              >
-                      {parseConversationTitle(conversation)}                                 
+                        onClick={() => populateConversation(conversation)}              
+                      >
+                      {parseConversationTitle(conversation)}         
                     </Dropdown.Item>                                    
                     </div>    
-                    ))}                        
+                  ))}                        
                     
                   </Dropdown>
                 </Panel>

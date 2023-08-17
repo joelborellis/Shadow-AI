@@ -7,7 +7,7 @@ from flask import Flask, Response, request, jsonify
 from dotenv import load_dotenv
 import azure.cosmos.documents as documents
 import azure.cosmos.cosmos_client as cosmos_client
-import base64
+import re
 import uuid
 
 load_dotenv()
@@ -64,7 +64,6 @@ def should_use_data():
 
 def prepare_body_headers_with_data(request):
     request_messages = request.json["messages"]
-    print(request_messages)
 
     #with open('promp.json', 'w') as fp:
                 #fp.write(json.dumps(request_messages))
@@ -129,7 +128,7 @@ def stream_with_data(body, headers, endpoint):
         #print(endpoint)
         #print(headers)
         with s.post(endpoint, json=body, headers=headers, stream=True) as r:
-            collected_messages = []
+
             for line in r.iter_lines(chunk_size=10):
                 if line:
                     lineJson = json.loads(line.lstrip(b"data:").decode("utf-8"))                    
@@ -247,7 +246,7 @@ def conversation_without_data(request):
         else:
             return Response(None, mimetype='text/event-stream')
 
-def get_user_history(request):
+def get_conversation_history(request):
     
     user = request.json["user"]
     
@@ -280,19 +279,27 @@ def save_conversation(request):
     #print('Database with id \'{0}\' was found'.format(DATABASE_ID))
     container = db.get_container_client(CONTAINER_ID)
     #print('Container with id \'{0}\' was found'.format(CONTAINER_ID))
+    
+    messages = request.json["messages"]
+    
+    #replace the [doc] placeholders for the citations
+    for item in messages:
+        item["content"] = re.sub(r'\[.*?\]', '', item["content"])
+        #print(item["content"])
+
+    #print(json.dumps(messages, indent=2))
       
     conversation = {
     "id": get_a_uuid(),
     "title": request.json["title"],
     "user": request.json["user"],
-    "messages": request.json["messages"]
+    "messages": messages,
 }
     
     container.create_item(body=conversation)
     
-    #print(json.dumps(conversation))
-    
     return Response(mimetype="application/json", status=200)
+
 
 @app.route("/conversation", methods=["GET", "POST"])
 def conversation():
@@ -306,18 +313,18 @@ def conversation():
         logging.exception("Exception in /conversation")
         return jsonify({"error": str(e)}), 500
     
-@app.route("/selecthistory", methods=["GET", "POST"])
+@app.route("/selectconversationhistory", methods=["GET", "POST"])
 def getchathistory():
     try:
         #res = get_user_history(request)
         #print("response:  ", res.get_data().decode("utf-8"))
-        return get_user_history(request)
+        return get_conversation_history(request)
     except Exception as e:
-        logging.exception("Exception in /selecthistory")
+        logging.exception("Exception in /selectconversationhistory")
         return jsonify({"error": str(e)}), 500
     
 @app.route("/saveconversation", methods=["GET", "POST"])
-def savechat():
+def saveconversation():
     try:
         return save_conversation(request)
     except Exception as e:
