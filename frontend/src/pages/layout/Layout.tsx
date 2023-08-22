@@ -1,4 +1,4 @@
-import { Outlet, Link } from "react-router-dom";
+import { Outlet, Link, NavLink } from "react-router-dom";
 import styles from "./Layout.module.css";
 import { useState } from "react";
 
@@ -35,6 +35,48 @@ const Layout = (props: any) => {
                 {isAuthenticated ? <GraphContent /> : "Not logged in"}
               </h3>
             </Link>
+
+            
+            <h3 className={styles.headerAdviceTitle}>
+                  <NavLink
+                    to="/chat2"
+                    className={({ isActive }) =>
+                      isActive
+                        ? styles.headerNavPageLinkActive
+                        : styles.headerNavPageLink
+                    }
+                  >
+                    Advice
+                  </NavLink>
+                  </h3>
+
+                  <h3 className={styles.headerInformationTitle}>
+                  <NavLink
+                    to="/chat3"
+                    className={({ isActive }) =>
+                      isActive
+                        ? styles.headerNavPageLinkActive
+                        : styles.headerNavPageLink
+                    }
+                  >
+                    Information
+                  </NavLink>
+                  </h3>
+
+                  <h3 className={styles.headerSuggestionTitle}>
+                  <NavLink
+                    to="/chat4"
+                    className={({ isActive }) =>
+                      isActive
+                        ? styles.headerNavPageLinkActive
+                        : styles.headerNavPageLink
+                    }
+                  >
+                    Suggestions
+                  </NavLink>
+                  </h3>
+              
+            
 
             <div className={styles.shareButtonContainer}>
               {isAuthenticated ? <SignOutButton /> : <SignInButton />}

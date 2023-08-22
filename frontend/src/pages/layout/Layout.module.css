@@ -140,3 +140,69 @@
 .states {
     display: flex;
 }
+
+.headerNavPageLink {
+    color: #ffffff;
+    text-decoration: none;
+    opacity: 0.75;
+    transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+    transition-duration: 500ms;
+    transition-property: opacity;
+}
+
+.headerNavPageLink:hover {
+    opacity: 1;
+}
+
+.headerNavPageLinkActive {
+    color: #ffffff;
+    text-decoration: none;
+}
+
+.headerNavLeftMargin {
+    margin-left: 40px;
+}
+
+.headerNavList {
+    display: flex;
+    list-style: none;
+    padding-left: 0;
+    margin-left: 14px;
+}
+
+.headerAdviceTitle {
+    font-family: "Segoe UI";
+    font-style: normal;
+    font-weight: 600;
+    font-size: 20px;
+    line-height: 28px;
+    display: flex;
+    align-items: flex-end;
+    color: #ffffff;
+    margin-left: 40px;
+}
+
+.headerInformationTitle {
+    font-family: "Segoe UI";
+    font-style: normal;
+    font-weight: 600;
+    font-size: 20px;
+    line-height: 28px;
+    display: flex;
+    align-items: flex-end;
+    color: #ffffff;
+    margin-left: 60px;
+}
+
+.headerSuggestionTitle {
+    font-family: "Segoe UI";
+    font-style: normal;
+    font-weight: 600;
+    font-size: 20px;
+    line-height: 28px;
+    display: flex;
+    align-items: flex-end;
+    color: #ffffff;
+    margin-left: 80px;
+}
+
