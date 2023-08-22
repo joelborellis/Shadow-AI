@@ -1,0 +1,1 @@
+"{\"id\": \"6908990b-d852-42e8-84ac-42ab9dade8ab\", \"model\": \"gpt-35-turbo-16k\", \"created\": 1692716951, \"object\": \"chat.completion.chunk\", \"choices\": [{\"messages\": [{\"role\": \"tool\", \"content\": \"{\\\"citations\\\": [], \\\"intent\\\": \\\"[]\\\"}\"}, {\"role\": \"assistant\", \"content\": \"Good morning! How can I assist you today?\"}]}]}"

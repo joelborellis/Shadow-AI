@@ -9,6 +9,16 @@ import azure.cosmos.documents as documents
 import azure.cosmos.cosmos_client as cosmos_client
 import re
 import uuid
+from langchain.embeddings.openai import OpenAIEmbeddings
+from langchain.vectorstores.azuresearch import AzureSearch
+from azure.search.documents.indexes.models import (
+    SearchableField,
+    SearchField,
+    SearchFieldDataType,
+    SimpleField,
+    ScoringProfile,
+    TextWeights,
+)
 
 load_dotenv()
 
@@ -51,6 +61,13 @@ HOST = os.environ.get("HOST")
 MASTER_KEY = os.environ.get("MASTER_KEY")
 DATABASE_ID = os.environ.get("DATABASE_ID")
 CONTAINER_ID = os.environ.get("CONTAINER_ID")
+
+model: str = "text-embedding-ada-002"
+
+vector_store_address: str = os.getenv("AZURE_SEARCH_SERVICE_ENDPOINT")
+vector_store_password: str = os.getenv("AZURE_SEARCH_KEY")
+embeddings: OpenAIEmbeddings = OpenAIEmbeddings(openai_api_key=AZURE_OPENAI_KEY,deployment=model, chunk_size=1)
+embedding_function = embeddings.embed_query
 
 def is_chat_model():
     if 'gpt-35' in AZURE_OPENAI_MODEL_NAME.lower():
@@ -151,6 +168,8 @@ def stream_with_data(body, headers, endpoint):
                         deltaText = lineJson["choices"][0]["messages"][0]["delta"]["content"]
                         if deltaText != "[DONE]":
                             response["choices"][0]["messages"][1]["content"] += deltaText              
+                    with open('response.json', 'w') as fp:
+                        fp.write(json.dumps(json.dumps(response)))
                     yield json.dumps(response).replace("\n", "\\n") + "\n"
                                     
                             
@@ -177,6 +196,7 @@ def conversation_with_data(request):
 def stream_without_data(response):
     responseText = ""
     for line in response:
+        print(json.dumps(line))
         deltaText = line["choices"][0]["delta"].get('content')
         if deltaText and deltaText != "[DONE]":
             responseText += deltaText
@@ -214,7 +234,7 @@ def conversation_without_data(request):
             "role": message["role"] ,
             "content": message["content"]
         })
-
+    print(json.dumps(messages))
     response = openai.ChatCompletion.create(
         engine=AZURE_OPENAI_MODEL,
         messages = messages,
@@ -238,6 +258,7 @@ def conversation_without_data(request):
                 }]
             }]
         }
+        print(json.dumps(response_obj))
 
         return jsonify(response_obj), 200
     else:
@@ -245,6 +266,66 @@ def conversation_without_data(request):
             return Response(stream_without_data(response), mimetype='text/event-stream')
         else:
             return Response(None, mimetype='text/event-stream')
+        
+def search(query: str):
+    fields = [
+    SimpleField(
+        name="id",
+        type=SearchFieldDataType.String,
+        key=True,
+        filterable=True,
+    ),
+    SearchableField(
+        name="content",
+        type=SearchFieldDataType.String,
+        searchable=True,
+    ),
+    SearchField(
+        name="content_vector",
+        type=SearchFieldDataType.Collection(SearchFieldDataType.Single),
+        searchable=True,
+        vector_search_dimensions=len(embedding_function("Text")),
+        vector_search_configuration="default",
+    ),
+    SearchableField(
+        name="metadata",
+        type=SearchFieldDataType.String,
+        searchable=True,
+    ),
+    # Additional field to store the title
+    SearchableField(
+        name="title",
+        type=SearchFieldDataType.String,
+        searchable=True,
+    ),
+    # Additional field for filtering on document source
+    SimpleField(
+        name="source",
+        type=SearchFieldDataType.String,
+        filterable=True,
+    ),
+]
+    
+    vector_store: AzureSearch = AzureSearch(
+        azure_search_endpoint=vector_store_address,
+        azure_search_key=vector_store_password,
+        index_name="langchain-demo-vector-index",
+        embedding_function=embedding_function,
+        fields=fields,
+    )
+    
+    # Generate the query vector testing the function
+    #query_vector = embeddings.embed_query("describe the challenger sales model")
+    #print(query_vector)
+    
+    # Perform a similarity search
+    docs = vector_store.similarity_search(
+        query=query,
+        k=3,
+        search_type="similarity",
+    )
+    print(docs[0].page_content)
+        
 
 def get_conversation_history(request):
     

@@ -1,0 +1,16 @@
+.settingsIcon {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 8px;
+    position: fixed;
+    width: 40px;
+    height: 40px;
+    right: 85px;
+    color: #FFFFFF;
+    border: 1px solid #D1D1D1;
+    border-radius: 20px;
+    z-index: 1;
+}

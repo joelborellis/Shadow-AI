@@ -99,6 +99,7 @@ const Chat = () => {
     let result = {} as ChatResponse;
     try {
       const response = await conversationApi(request, abortController.signal);
+     
       if (response?.body) {
         const reader = response.body.getReader();
         let runningText = "";
@@ -108,6 +109,7 @@ const Chat = () => {
 
           var text = new TextDecoder("utf-8").decode(value);
           const objects = text.split("\n");
+          //alert(objects);
           objects.forEach((obj) => {
             try {
               runningText += obj;
@@ -345,10 +347,9 @@ const Chat = () => {
                   className={styles.chatIcon}
                   aria-hidden="true"
                 />
-                <h1 className={styles.chatEmptyStateTitle}>Start a chat</h1>
+                <h1 className={styles.chatEmptyStateTitle}>I’m Shadow ...</h1>
                 <h2 className={styles.chatEmptyStateSubtitle}>
-                  This chatbot is configured to answer your sales related
-                  questions
+                We’ve got less time and more to do.  I’ll help you get better prepared, faster. Feel free to ask follow up questions for more details and context.
                 </h2>
               </Stack>
             ) : (
@@ -517,7 +518,7 @@ const Chat = () => {
 
               <QuestionInput
                 clearOnSend
-                placeholder="Talk to me about your sales pursuits..."
+                placeholder="Let’s chat...talk to me about the situation. Tell me what you need and where we’re at?"
                 disabled={isLoading}
                 onSend={(question) => makeApiRequest(question)}
               />

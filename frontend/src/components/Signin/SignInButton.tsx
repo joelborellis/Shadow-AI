@@ -1,6 +1,6 @@
 import { useMsal } from "@azure/msal-react";
 import { loginRequest } from "../../authConfig";
-import { Shield12Regular } from "@fluentui/react-icons";
+import { LockOpen12Regular } from "@fluentui/react-icons";
 import styles from "./SignIn.module.css";
 
 /**
@@ -19,7 +19,7 @@ export const SignInButton = () => {
     }
   };
   return (
-    <Shield12Regular
+    <LockOpen12Regular
       className={styles.signinIcon}
       style={{
       background: "radial-gradient(109.81% 107.82% at 100.1% 90.19%, #0F6CBD 33.63%, #2D87C3 70.31%, #8DDDD8 100%)",

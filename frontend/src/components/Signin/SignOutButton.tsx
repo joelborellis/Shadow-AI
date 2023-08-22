@@ -1,6 +1,6 @@
 import { useMsal } from "@azure/msal-react";
 import styles from "./SignIn.module.css";
-import { SignOutRegular } from "@fluentui/react-icons";
+import { LockClosed12Regular } from "@fluentui/react-icons";
 
 
 /**
@@ -18,7 +18,7 @@ export const SignOutButton = () => {
   };
 
   return (
-    <SignOutRegular
+    <LockClosed12Regular
       className={styles.signoutIcon}
       style={{
       background: "radial-gradient(109.81% 107.82% at 100.1% 90.19%, #0F6CBD 33.63%, #2D87C3 70.31%, #8DDDD8 100%)",
